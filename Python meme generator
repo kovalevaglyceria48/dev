@@ -1,0 +1,40 @@
+pip install Pillow
+from PIL import Image, ImageDraw, ImageFont
+
+def generate_meme(image_path, top_text, bottom_text, output_path):
+    # Open the image
+    img = Image.open(image_path)
+    
+    # Load a font
+    font = ImageFont.load_default()
+
+    # Get a drawing context
+    draw = ImageDraw.Draw(img)
+
+    # Calculate text size and position
+    text_width, text_height = draw.textsize(top_text, font=font)
+    text_x = (img.width - text_width) // 2
+    text_y = 10
+
+    # Add top text
+    draw.text((text_x, text_y), top_text, (255, 255, 255), font=font)
+
+    # Calculate bottom text size and position
+    text_width, text_height = draw.textsize(bottom_text, font=font)
+    text_x = (img.width - text_width) // 2
+    text_y = img.height - text_height - 10
+
+    # Add bottom text
+    draw.text((text_x, text_y), bottom_text, (255, 255, 255), font=font)
+
+    # Save the output image
+    img.save(output_path)
+
+if __name__ == "__main__":
+    # Example usage
+    image_path = "path/to/your/image.jpg"
+    top_text = "Top Text"
+    bottom_text = "Bottom Text"
+    output_path = "output/meme_output.jpg"
+
+    generate_meme(image_path, top_text, bottom_text, output_path)
