@@ -1,17 +1,31 @@
-pip install Pillow
 from PIL import Image, ImageDraw, ImageFont
+import os
 
-def generate_meme(image_path, top_text, bottom_text, output_path):
-    # Open the image
-    img = Image.open(image_path)
-    
+def generate_meme(image_path, top_text, bottom_text, output_path, font_path=None, font_size=40):
+    try:
+        # Open the image
+        img = Image.open(image_path)
+    except FileNotFoundError:
+        print(f"Error: Image not found at {image_path}")
+        return
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return
+
     # Load a font
-    font = ImageFont.load_default()
+    if font_path:
+        try:
+            font = ImageFont.truetype(font_path, font_size)
+        except Exception as e:
+            print(f"Error loading font: {e}")
+            font = ImageFont.load_default()
+    else:
+        font = ImageFont.load_default()
 
     # Get a drawing context
     draw = ImageDraw.Draw(img)
 
-    # Calculate text size and position
+    # Calculate text size and position for top text
     text_width, text_height = draw.textsize(top_text, font=font)
     text_x = (img.width - text_width) // 2
     text_y = 10
@@ -19,7 +33,7 @@ def generate_meme(image_path, top_text, bottom_text, output_path):
     # Add top text
     draw.text((text_x, text_y), top_text, (255, 255, 255), font=font)
 
-    # Calculate bottom text size and position
+    # Calculate text size and position for bottom text
     text_width, text_height = draw.textsize(bottom_text, font=font)
     text_x = (img.width - text_width) // 2
     text_y = img.height - text_height - 10
@@ -30,11 +44,20 @@ def generate_meme(image_path, top_text, bottom_text, output_path):
     # Save the output image
     img.save(output_path)
 
+def list_fonts():
+    font_list = ImageFont.get_fonts()
+    for font in font_list:
+        print(font)
+
 if __name__ == "__main__":
     # Example usage
     image_path = "path/to/your/image.jpg"
     top_text = "Top Text"
     bottom_text = "Bottom Text"
     output_path = "output/meme_output.jpg"
+    font_path = "path/to/your/font.ttf"  # Set to None for default font
 
-    generate_meme(image_path, top_text, bottom_text, output_path)
+    generate_meme(image_path, top_text, bottom_text, output_path, font_path)
+
+    # Additional functions
+    # list_fonts()  # Uncomment to see a list of available fonts
