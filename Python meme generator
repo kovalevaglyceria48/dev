@@ -1,7 +1,9 @@
 from PIL import Image, ImageDraw, ImageFont
 import os
 
-def generate_meme(image_path, top_text, bottom_text, output_path, font_path=None, font_size=40):
+def generate_meme(image_path, top_text, bottom_text, output_path, font_path=None, font_size=40,
+                  text_color=(255, 255, 255), outline_color=None, shadow_color=None, outline_width=0, shadow_offset=(5, 5),
+                  resize_width=None, resize_height=None):
     try:
         # Open the image
         img = Image.open(image_path)
@@ -11,6 +13,10 @@ def generate_meme(image_path, top_text, bottom_text, output_path, font_path=None
     except Exception as e:
         print(f"An error occurred: {e}")
         return
+
+    # Resize image if specified
+    if resize_width and resize_height:
+        img = img.resize((resize_width, resize_height))
 
     # Load a font
     if font_path:
@@ -25,24 +31,37 @@ def generate_meme(image_path, top_text, bottom_text, output_path, font_path=None
     # Get a drawing context
     draw = ImageDraw.Draw(img)
 
-    # Calculate text size and position for top text
-    text_width, text_height = draw.textsize(top_text, font=font)
-    text_x = (img.width - text_width) // 2
-    text_y = 10
-
     # Add top text
-    draw.text((text_x, text_y), top_text, (255, 255, 255), font=font)
-
-    # Calculate text size and position for bottom text
-    text_width, text_height = draw.textsize(bottom_text, font=font)
-    text_x = (img.width - text_width) // 2
-    text_y = img.height - text_height - 10
+    draw_text(draw, top_text, font, text_color, outline_color, shadow_color, outline_width, shadow_offset, img.width, img.height, True)
 
     # Add bottom text
-    draw.text((text_x, text_y), bottom_text, (255, 255, 255), font=font)
+    draw_text(draw, bottom_text, font, text_color, outline_color, shadow_color, outline_width, shadow_offset, img.width, img.height, False)
 
     # Save the output image
     img.save(output_path)
+
+def draw_text(draw, text, font, text_color, outline_color, shadow_color, outline_width, shadow_offset, img_width, img_height, top):
+    # Calculate text size and position
+    text_width, text_height = draw.textsize(text, font=font)
+    text_x = (img_width - text_width) // 2
+    if top:
+        text_y = 10
+    else:
+        text_y = img_height - text_height - 10
+
+    # Add outline if specified
+    if outline_color:
+        for dx in range(-outline_width, outline_width + 1):
+            for dy in range(-outline_width, outline_width + 1):
+                draw.text((text_x + dx, text_y + dy), text, font=font, fill=outline_color)
+
+    # Add shadow if specified
+    if shadow_color:
+        shadow_x, shadow_y = shadow_offset
+        draw.text((text_x + shadow_x, text_y + shadow_y), text, font=font, fill=shadow_color)
+
+    # Add text
+    draw.text((text_x, text_y), text, font=font, fill=text_color)
 
 def list_fonts():
     font_list = ImageFont.get_fonts()
@@ -57,7 +76,6 @@ if __name__ == "__main__":
     output_path = "output/meme_output.jpg"
     font_path = "path/to/your/font.ttf"  # Set to None for default font
 
-    generate_meme(image_path, top_text, bottom_text, output_path, font_path)
-
-    # Additional functions
-    # list_fonts()  # Uncomment to see a list of available fonts
+    generate_meme(image_path, top_text, bottom_text, output_path, font_path,
+                  text_color=(255, 255, 255), outline_color=(0, 0, 0), shadow_color=(0, 0, 0), outline_width=2,
+                  
